@@ -10,7 +10,7 @@ const PORT = 5000;
 async function main() {
   try {
     await mongoose.connect(
-      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dssil.mongodb.net/note-with-mongoose?retryWrites=true&w=majority&appName=Cluster0`
+      `mongodb+srv://EventZen:DHV6DUmeBBI6Aw2w@cluster0.dssil.mongodb.net/EventZen?retryWrites=true&w=majority&appName=Cluster0`
     );
     console.log("EventZen Server Connected to mongodb using mongoose");
     server = app.listen(PORT, () => {
