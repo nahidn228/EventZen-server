@@ -3,6 +3,7 @@ export interface IUser {
   email: string;
   password: string;
   photoURL: string;
+  token?: string;
   // role: "USER" | "ADMIN" | "SUPERADMIN";
   // address: {
   //   city: string;

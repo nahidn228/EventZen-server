@@ -4,11 +4,12 @@ import { IEvents } from "../interfaces/events.interface";
 const eventSchema = new Schema<IEvents>(
   {
     eventTitle: { type: String, required: true, trim: true },
-    eventDate: { type: String, required: true },
+    eventDate: { type: Date, required: true },
     name: { type: String, required: true, trim: true },
+    email: { type: String, required: true },
     location: { type: String, required: true },
     description: { type: String },
-    attendeeCount: { type: Number },
+    attendeeCount: { type: Number, required: true },
   },
   {
     versionKey: false,

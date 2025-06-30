@@ -19,12 +19,12 @@ const zod_1 = require("zod");
 exports.usersRoutes = express_1.default.Router();
 //ZOD validation
 const createUserZodSchema = zod_1.z.object({
-    firstName: zod_1.z.string(),
-    lastName: zod_1.z.string(),
+    name: zod_1.z.string(),
     email: zod_1.z.string(),
-    age: zod_1.z.number(),
     password: zod_1.z.string(),
-    role: zod_1.z.string().optional(),
+    photoURL: zod_1.z.string(),
+    // age: z.number(),
+    // role: z.string().optional(),
 });
 exports.usersRoutes.post("/create-user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -50,7 +50,7 @@ exports.usersRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, fun
     const users = yield user_models_1.User.find();
     res.status(201).json({
         success: true,
-        message: "All Users retreived successfuly",
+        message: "All Users retrieved successfully",
         users,
     });
 }));
@@ -59,7 +59,7 @@ exports.usersRoutes.get("/:userId", (req, res) => __awaiter(void 0, void 0, void
     const user = yield user_models_1.User.findById(userId);
     res.status(201).json({
         success: true,
-        message: "User retrived successfuly",
+        message: "User retrieved successfully",
         user,
     });
 }));
@@ -68,17 +68,17 @@ exports.usersRoutes.delete("/:userId", (req, res) => __awaiter(void 0, void 0, v
     const user = yield user_models_1.User.findByIdAndDelete(userId);
     res.status(201).json({
         success: true,
-        message: "User Deleted successfuly",
+        message: "User Deleted successfully",
         user,
     });
 }));
-exports.usersRoutes.patch("/:userId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.usersRoutes.put("/:userId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.userId;
     const updatedBody = req.body;
     const user = yield user_models_1.User.findByIdAndUpdate(userId, updatedBody, { new: true });
     res.status(201).json({
         success: true,
-        message: "User updated successfuly",
+        message: "User updated successfully",
         user,
     });
 }));

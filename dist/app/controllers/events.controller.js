@@ -49,7 +49,7 @@ exports.eventsRoutes.post("/create-Event", (req, res) => __awaiter(void 0, void 
 // });
 exports.eventsRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filter, dateFilter, sortBy = "createdAt", sort = "asc", limit = "10", } = req.query;
+        const { filter, dateFilter, sortBy = "createdAt", sort = "asc", limit = "12", } = req.query;
         const filterCondition = {};
         if (filter) {
             filterCondition.eventTitle = {

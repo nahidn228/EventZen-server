@@ -28,6 +28,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: [true, "Please give a photo URL"],
     },
+    token: { type: String, required: false },
     // age: {
     //   type: Number,
     //   required: true,

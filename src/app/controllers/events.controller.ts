@@ -14,6 +14,7 @@ const createEventZodSchema = z.object({
   eventTitle: z.string(),
   eventDate: z.string(),
   name: z.string(),
+  email: z.string(),
   attendeeCount: z.number(),
   location: z.string(),
   description: z.string(),
@@ -49,7 +50,7 @@ eventsRoutes.get("/", async (req: Request, res: Response) => {
       dateFilter,
       sortBy = "createdAt",
       sort = "asc",
-      limit = "10",
+      limit = "12",
     } = req.query;
 
     const filterCondition: Record<string, unknown> = {};
@@ -99,6 +100,25 @@ eventsRoutes.get("/", async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(500).send({
+      success: false,
+      message: "Failed to retrieve events",
+      error,
+    });
+  }
+});
+
+eventsRoutes.get("/my-event", async (req: Request, res: Response) => {
+  const email = req.query.email as string;
+  
+  try {
+    const data = await Event.find({ email });
+    res.status(200).json({
+      success: true,
+      message: "My events retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: "Failed to retrieve events",
       error,

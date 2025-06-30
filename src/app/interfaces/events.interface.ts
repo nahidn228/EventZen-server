@@ -1,6 +1,7 @@
 export interface IEvents {
   eventTitle: string;
-  eventDate: string;
+  email: string;
+  eventDate: Date;
   name: string;
   location: string;
   description: string;
