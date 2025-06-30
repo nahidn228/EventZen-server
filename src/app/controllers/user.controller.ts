@@ -6,12 +6,12 @@ export const usersRoutes = express.Router();
 
 //ZOD validation
 const createUserZodSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
+  name: z.string(),
   email: z.string(),
-  age: z.number(),
   password: z.string(),
-  role: z.string().optional(),
+  photoURL: z.string(),
+  // age: z.number(),
+  // role: z.string().optional(),
 });
 
 usersRoutes.post("/create-user", async (req: Request, res: Response) => {
@@ -28,7 +28,6 @@ usersRoutes.post("/create-user", async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.log(error);
-
     res.status(400).json({
       success: false,
       message: error.message,
@@ -41,7 +40,7 @@ usersRoutes.get("/", async (req: Request, res: Response) => {
 
   res.status(201).json({
     success: true,
-    message: "All Users retreived successfuly",
+    message: "All Users retrieved successfully",
     users,
   });
 });
@@ -51,28 +50,32 @@ usersRoutes.get("/:userId", async (req: Request, res: Response) => {
 
   res.status(201).json({
     success: true,
-    message: "User retrived successfuly",
+    message: "User retrieved successfully",
     user,
   });
 });
+
+
 usersRoutes.delete("/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const user = await User.findByIdAndDelete(userId);
 
   res.status(201).json({
     success: true,
-    message: "User Deleted successfuly",
+    message: "User Deleted successfully",
     user,
   });
 });
-usersRoutes.patch("/:userId", async (req: Request, res: Response) => {
+
+
+usersRoutes.put("/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const updatedBody = req.body;
   const user = await User.findByIdAndUpdate(userId, updatedBody, { new: true });
 
   res.status(201).json({
     success: true,
-    message: "User updated successfuly",
+    message: "User updated successfully",
     user,
   });
 });

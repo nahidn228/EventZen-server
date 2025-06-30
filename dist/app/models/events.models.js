@@ -4,6 +4,7 @@ exports.Event = void 0;
 const mongoose_1 = require("mongoose");
 const eventSchema = new mongoose_1.Schema({
     eventTitle: { type: String, required: true, trim: true },
+    eventDate: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     location: { type: String, required: true },
     description: { type: String },

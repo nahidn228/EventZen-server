@@ -33,7 +33,7 @@ exports.usersRoutes.post("/create-user", (req, res) => __awaiter(void 0, void 0,
         const user = yield user_models_1.User.create(body);
         res.status(201).json({
             success: true,
-            message: "User created successfuly",
+            message: "User created successfully",
             user,
         });
     }
