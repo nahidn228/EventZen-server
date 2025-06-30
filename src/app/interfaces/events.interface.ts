@@ -1,7 +1,7 @@
 export interface IEvents {
   eventTitle: string;
+  eventDate: string;
   name: string;
-  date: Date;
   location: string;
   description: string;
   attendeeCount: number;

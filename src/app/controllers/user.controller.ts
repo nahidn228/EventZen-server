@@ -23,7 +23,7 @@ usersRoutes.post("/create-user", async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: "User created successfuly",
+      message: "User created successfully",
       user,
     });
   } catch (error: any) {

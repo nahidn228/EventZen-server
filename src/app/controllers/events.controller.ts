@@ -1,68 +1,144 @@
 import express, { Request, Response } from "express";
 import { Event } from "../models/events.models";
+import { SortOrder } from "mongoose";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import { z } from "zod";
+
+dayjs.extend(isBetween);
 
 export const eventsRoutes = express.Router();
 
+//ZOD validation
+const createEventZodSchema = z.object({
+  eventTitle: z.string(),
+  eventDate: z.string(),
+  name: z.string(),
+  attendeeCount: z.number(),
+  location: z.string(),
+  description: z.string(),
+});
+
 eventsRoutes.post("/create-Event", async (req: Request, res: Response) => {
-  const body = req.body;
+  const body = await createEventZodSchema.parseAsync(req.body);
   console.log(`from body: ${body}`);
 
-  const event = await Event.create(body);
+  const data = await Event.create(body);
 
   res.status(201).json({
     success: true,
     message: "Event created successfully",
-    event,
+    data,
   });
 });
 
+// eventsRoutes.get("/", async (req: Request, res: Response) => {
+//   const Events = await Event.find();
 
+//   res.status(201).json({
+//     success: true,
+//     message: "Events retrieved successfully",
+//     Events,
+//   });
+// });
 
 eventsRoutes.get("/", async (req: Request, res: Response) => {
-  const Events = await Event.find();
+  try {
+    const {
+      filter,
+      dateFilter,
+      sortBy = "createdAt",
+      sort = "asc",
+      limit = "10",
+    } = req.query;
 
-  res.status(201).json({
-    success: true,
-    message: "Events retrieved successfully",
-    Events,
-  });
+    const filterCondition: Record<string, unknown> = {};
+
+    if (filter) {
+      filterCondition.eventTitle = {
+        $regex: new RegExp(filter.toString(), "i"),
+      };
+    }
+
+    const today = dayjs().startOf("day");
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+
+    if (dateFilter === "today") {
+      startDate = today.toDate();
+      endDate = dayjs(today).endOf("day").toDate();
+    } else if (dateFilter === "current-week") {
+      startDate = dayjs().startOf("week").toDate();
+      endDate = dayjs().endOf("week").toDate();
+    } else if (dateFilter === "last-week") {
+      startDate = dayjs().subtract(1, "week").startOf("week").toDate();
+      endDate = dayjs().subtract(1, "week").endOf("week").toDate();
+    } else if (dateFilter === "current-month") {
+      startDate = dayjs().startOf("month").toDate();
+      endDate = dayjs().endOf("month").toDate();
+    } else if (dateFilter === "last-month") {
+      startDate = dayjs().subtract(1, "month").startOf("month").toDate();
+      endDate = dayjs().subtract(1, "month").endOf("month").toDate();
+    }
+
+    if (startDate && endDate) {
+      filterCondition.eventDate = { $gte: startDate, $lte: endDate };
+    }
+
+    const sortCondition: Record<string, SortOrder> = {};
+    sortCondition[sortBy.toString()] = sort === "desc" ? -1 : 1;
+
+    const data = await Event.find(filterCondition)
+      .sort(sortCondition)
+      .limit(Number(limit));
+
+    res.status(200).send({
+      success: true,
+      message: "Events retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to retrieve events",
+      error,
+    });
+  }
 });
-
 
 eventsRoutes.get("/:id", async (req: Request, res: Response) => {
   const id = req.params.id;
-  const Events = await Event.findById(id);
+  const data = await Event.findById(id);
 
   res.status(201).json({
     success: true,
     message: "Event Find successfully",
-    Events,
+    data,
   });
 });
 
-
 eventsRoutes.put("/:id", async (req: Request, res: Response) => {
-  const EventId = req.params.id;
+  const eventId = req.params.id;
   const updateBody = req.body;
 
-  const event = await Event.findByIdAndUpdate(EventId, updateBody, {
+  const data = await Event.findByIdAndUpdate(eventId, updateBody, {
     new: true,
   });
 
   res.status(201).json({
     success: true,
     message: "Event update successfully",
-    event,
+    data,
   });
 });
 eventsRoutes.delete("/:id", async (req: Request, res: Response) => {
-  const EventId = req.params.id;
+  const eventId = req.params.id;
 
-  const event = await Event.findByIdAndDelete(EventId);
+  const data = await Event.findByIdAndDelete(eventId);
 
   res.status(201).json({
     success: true,
     message: "Event deleted successfully",
-    event,
+    data,
   });
 });
