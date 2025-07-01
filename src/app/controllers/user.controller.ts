@@ -15,23 +15,6 @@ const createUserZodSchema = z.object({
   // role: z.string().optional(),
 });
 
-const authenticate = async (req: Request, res: Response, next: Function) => {
-  const token = req.headers.authorization;
-
-  if (!token) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  const user = await User.findOne({ token });
-  if (!user) {
-    return res.status(401).json({ message: "Invalid token" });
-  }
-
-  // attach user to request
-  (req as any).user = user;
-  next();
-};
-
 usersRoutes.post("/create-user", async (req: Request, res: Response) => {
   try {
     const body = await createUserZodSchema.parseAsync(req.body);
@@ -57,7 +40,7 @@ usersRoutes.post("/create-user", async (req: Request, res: Response) => {
   }
 });
 
-usersRoutes.get("/login", async (req: Request, res: Response) => {
+usersRoutes.post("/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -98,15 +81,23 @@ usersRoutes.get("/login", async (req: Request, res: Response) => {
   }
 });
 
-usersRoutes.get("/:userId", async (req: Request, res: Response) => {
-  const userId = req.params.userId;
-  const user = await User.findById(userId);
+usersRoutes.get("/current-user", async (req: Request, res: Response) => {
+  const email = req.query.email as string;
 
-  res.status(201).json({
-    success: true,
-    message: "User retrieved successfully",
-    user,
-  });
+  try {
+    const data = await User.find({ email });
+    res.status(200).json({
+      success: true,
+      message: "Current User retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve Current User",
+      error,
+    });
+  }
 });
 
 usersRoutes.delete("/:userId", async (req: Request, res: Response) => {

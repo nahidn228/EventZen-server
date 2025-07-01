@@ -9,7 +9,8 @@ const eventSchema = new Schema<IEvents>(
     email: { type: String, required: true },
     location: { type: String, required: true },
     description: { type: String },
-    attendeeCount: { type: Number, required: true },
+    attendeeCount: { type: Number },
+    joinedUsers: { type: [String], default: [] },
   },
   {
     versionKey: false,

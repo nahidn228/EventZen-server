@@ -6,4 +6,5 @@ export interface IEvents {
   location: string;
   description: string;
   attendeeCount: number;
+  joinedUsers?: string[];
 }
