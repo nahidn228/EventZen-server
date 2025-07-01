@@ -4,9 +4,19 @@ import { usersRoutes } from "./app/controllers/user.controller";
 import { eventsRoutes } from "./app/controllers/events.controller";
 
 const app: Application = express();
-app.use(express.json());
-app.use(cors());
 
+const allowedOrigins = [
+  "https://eventzen-ashen.vercel.app",
+  "http://localhost:5173",
+];
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
 app.use("/events", eventsRoutes);
 app.use("/users", usersRoutes);

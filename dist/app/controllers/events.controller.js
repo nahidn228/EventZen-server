@@ -18,6 +18,7 @@ const events_models_1 = require("../models/events.models");
 const dayjs_1 = __importDefault(require("dayjs"));
 const isBetween_1 = __importDefault(require("dayjs/plugin/isBetween"));
 const zod_1 = require("zod");
+const authenticate_1 = __importDefault(require("../../middlewares/authenticate"));
 dayjs_1.default.extend(isBetween_1.default);
 exports.eventsRoutes = express_1.default.Router();
 //ZOD validation
@@ -25,11 +26,13 @@ const createEventZodSchema = zod_1.z.object({
     eventTitle: zod_1.z.string(),
     eventDate: zod_1.z.string(),
     name: zod_1.z.string(),
+    email: zod_1.z.string(),
     attendeeCount: zod_1.z.number(),
     location: zod_1.z.string(),
     description: zod_1.z.string(),
+    joinedUsers: zod_1.z.array(zod_1.z.string()).optional().default([]),
 });
-exports.eventsRoutes.post("/create-Event", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.eventsRoutes.post("/create-Event", authenticate_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = yield createEventZodSchema.parseAsync(req.body);
     console.log(`from body: ${body}`);
     const data = yield events_models_1.Event.create(body);
@@ -101,6 +104,24 @@ exports.eventsRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, fu
         });
     }
 }));
+exports.eventsRoutes.get("/my-event", authenticate_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const email = req.query.email;
+    try {
+        const data = yield events_models_1.Event.find({ email });
+        res.status(200).json({
+            success: true,
+            message: "My events retrieved successfully",
+            data,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve events",
+            error,
+        });
+    }
+}));
 exports.eventsRoutes.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
     const data = yield events_models_1.Event.findById(id);
@@ -121,6 +142,38 @@ exports.eventsRoutes.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0,
         message: "Event update successfully",
         data,
     });
+}));
+exports.eventsRoutes.put("/join/:id", authenticate_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventId = req.params.id;
+    const userEmail = req.user.email;
+    try {
+        const event = yield events_models_1.Event.findById(eventId);
+        if (!event) {
+            res.status(404).json({ message: "Event not found" });
+            return;
+        }
+        if (!event.joinedUsers) {
+            event.joinedUsers = [];
+        }
+        if (event.joinedUsers.includes(userEmail)) {
+            res
+                .status(400)
+                .json({ message: "You have already joined this event." });
+            return;
+        }
+        event.joinedUsers.push(userEmail);
+        event.attendeeCount += 1;
+        yield event.save();
+        res.status(200).json({
+            success: true,
+            message: "Successfully joined event",
+            data: event,
+        });
+    }
+    catch (error) {
+        console.error("Join event error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
 }));
 exports.eventsRoutes.delete("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const eventId = req.params.id;

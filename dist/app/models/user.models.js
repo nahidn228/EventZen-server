@@ -30,6 +30,7 @@ const userSchema = new mongoose_1.Schema({
         type: String,
         required: [true, "Please give a photo URL"],
     },
+    token: { type: String, required: false },
     // age: {
     //   type: Number,
     //   required: true,

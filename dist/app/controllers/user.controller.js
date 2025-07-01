@@ -16,6 +16,7 @@ exports.usersRoutes = void 0;
 const express_1 = __importDefault(require("express"));
 const user_models_1 = require("../models/user.models");
 const zod_1 = require("zod");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 exports.usersRoutes = express_1.default.Router();
 //ZOD validation
 const createUserZodSchema = zod_1.z.object({
@@ -29,8 +30,8 @@ const createUserZodSchema = zod_1.z.object({
 exports.usersRoutes.post("/create-user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = yield createUserZodSchema.parseAsync(req.body);
-        console.log(body, "zod Body");
-        const user = yield user_models_1.User.create(body);
+        const hashedPassword = yield bcrypt_1.default.hash(body.password, 10);
+        const user = yield user_models_1.User.create(Object.assign(Object.assign({}, body), { password: hashedPassword }));
         res.status(201).json({
             success: true,
             message: "User created successfully",
@@ -46,22 +47,60 @@ exports.usersRoutes.post("/create-user", (req, res) => __awaiter(void 0, void 0,
         });
     }
 }));
-exports.usersRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_models_1.User.find();
-    res.status(201).json({
-        success: true,
-        message: "All Users retrieved successfully",
-        users,
-    });
+exports.usersRoutes.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
+    try {
+        const user = yield user_models_1.User.findOne({ email });
+        if (!user) {
+            res.status(401).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+            return;
+        }
+        const isPasswordMatch = yield bcrypt_1.default.compare(password, user.password);
+        if (!isPasswordMatch) {
+            res.status(401).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+            return;
+        }
+        const token = Math.random().toString(36).substring(2);
+        user.token = token;
+        yield user.save();
+        res.status(201).json({
+            success: true,
+            message: "All Users retrieved successfully",
+            user,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Login failed",
+            error,
+        });
+    }
 }));
-exports.usersRoutes.get("/:userId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.params.userId;
-    const user = yield user_models_1.User.findById(userId);
-    res.status(201).json({
-        success: true,
-        message: "User retrieved successfully",
-        user,
-    });
+exports.usersRoutes.get("/current-user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const email = req.query.email;
+    try {
+        const data = yield user_models_1.User.find({ email });
+        res.status(200).json({
+            success: true,
+            message: "Current User retrieved successfully",
+            data,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve Current User",
+            error,
+        });
+    }
 }));
 exports.usersRoutes.delete("/:userId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.userId;
